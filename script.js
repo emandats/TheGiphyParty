@@ -1,5 +1,16 @@
 // Global Constants
-const apiKey = "MY_API_KEY"
+const api_key = "RbDSJNgMf4pOuDpCr1t4IulLYNzCIFAF"
+const limit = 9
+
+// Variables
+var pages = 0
+var searchTerm = ''
+
+// Page Elements
+const searchForm = document.querySelector("#search-form");
+const searchInput = document.querySelector("#search-input");
+const gifResults = document.querySelector("#gif-results");
+const showMoreBtn = document.querySelector("#show-more-button");
 
 /**
  * Update the DOM to display results from the Giphy API query.
@@ -9,7 +20,13 @@ const apiKey = "MY_API_KEY"
  *
  */
 function displayResults(results) {
-  // YOUR CODE HERE
+  gifResults.innerHTML = "";
+
+  for (const result of results) {
+    const gifElement = document.createElement("img");
+    gifElement.src = result.images.fixed_height.url;
+    gifResults.appendChild(gifElement);
+  }
 }
 
 /**
@@ -20,7 +37,10 @@ function displayResults(results) {
  *
  */
 async function getGiphyApiResults(searchTerm) {
-  // YOUR CODE HERE
+  const offset = pages * limit
+  const response = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${api_key}&q=${searchTerm}&limit=${limit}&offset=${offset}&rating=g&lang=en`);
+  const jsonResponse = await response.json()
+  return jsonResponse.data
 }
 
 /**
@@ -30,10 +50,14 @@ async function getGiphyApiResults(searchTerm) {
  *
  */
 async function handleFormSubmit(event) {
-  // YOUR CODE HERE
-}
+  event.preventDefault();
+  
+  searchTerm = searchInput.value; 
+  pages = 0;
 
-// searchForm.addEventListener("submit", handleFormSubmit)
+  const results = await getGiphyApiResults(searchTerm);
+  displayResults(results);
+}
 
 /**
  * Handle fetching the next set of results from the Giphy API
@@ -43,10 +67,13 @@ async function handleFormSubmit(event) {
  *
  */
 async function handleShowMore(event) {
-  // YOUR CODE HERE
+  const results = await getGiphyApiResults(searchTerm) //fetches next set of gif results 
+  displayResults(results) //displays the fetched results 
+  pages += 1 // keeps track of current page
 }
 
 window.onload = function () {
-  // YOUR CODE HERE
   // Add any event handlers here
+  searchForm.addEventListener("submit", handleFormSubmit);
+  showMoreBtn.addEventListener("click", handleShowMore);
 }
